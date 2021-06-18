@@ -1,5 +1,5 @@
 import { mergeDelta } from "utils/index";
-import { SortDirections } from "screens/OrderBook/@types";
+import { SortDirections } from "screens/OrderBook/types";
 
 describe("mergeDelta", () => {
   const arr1Asc = [

@@ -5,7 +5,7 @@ import {
   OrderBookAction,
   Order,
   RawOrderData,
-} from "./@types";
+} from "./types";
 import { useSafeDispatch } from "utils/hooks";
 import createWsConn from "utils/ws-client";
 import { orderBookReducer, initialState, nextProduct } from "./reducer";

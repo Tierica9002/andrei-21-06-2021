@@ -4,7 +4,7 @@ import {
   OrderBookAction,
   ProductIDs,
   Order,
-} from "./@types";
+} from "./types";
 import { mergeDelta } from "utils/index";
 
 const nextProduct = {

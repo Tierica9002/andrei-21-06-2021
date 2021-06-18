@@ -1,5 +1,5 @@
 import React from "react";
-import { Sides, SortDirections } from "./@types";
+import { Sides, SortDirections } from "./types";
 import Button from "components/Button";
 import SwitchHorizontal from "components/icons/SwitchHorizontal";
 import OrderBookSide from "screens/OrderBook/OrderBookSide";

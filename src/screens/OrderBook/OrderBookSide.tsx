@@ -1,5 +1,5 @@
 import React from "react";
-import { SortDirections, Order, Sides } from "./@types";
+import { SortDirections, Order, Sides } from "./types";
 import TableHeader from "components/TableHeader";
 import TableRow from "components/TableRow";
 import ProgressBarContainer from "components/ProgressBarContainer";
@@ -17,14 +17,6 @@ const OrderBookSide = ({
   rows,
   maxOrderSize,
 }: OrderBookSideProps): JSX.Element => {
-  const [progress, setProgress] = React.useState(0);
-
-  // React.useEffect(() => {
-  //   setInterval(() => {
-  //     setProgress((prev) => prev + 1);
-  //   }, 350);
-  // }, []);
-
   return (
     <>
       <TableHeader>

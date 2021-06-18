@@ -89,10 +89,8 @@ const orderBookReducer = (
       const bidOrdersWithTotal = totalCalculator(bids);
       const askOrdersWithTotal = totalCalculator(asks);
 
-      const maxBidTotal =
-        bidOrdersWithTotal[bidOrdersWithTotal.length - 1].total;
-      const maxAskTotal =
-        askOrdersWithTotal[askOrdersWithTotal.length - 1].total;
+      const maxBidTotal = bidOrdersWithTotal[14].total;
+      const maxAskTotal = askOrdersWithTotal[14].total;
 
       return {
         ...state,
@@ -104,18 +102,16 @@ const orderBookReducer = (
       };
     }
     case "flush_to_dom": {
-      const maxBidTotal =
-        state.bidSide.orders[state.bidSide.orders.length - 1].total;
-      const maxAskTotal =
-        state.askSide.orders[state.askSide.orders.length - 1].total;
+      const maxBidTotal = state.bidSide.orders[14].total;
+      const maxAskTotal = state.askSide.orders[14].total;
 
       return {
         ...state,
         renderedAskSide: {
-          orders: state.askSide.orders,
+          orders: state.askSide.orders.slice(0, 15),
         },
         renderedBidSide: {
-          orders: state.bidSide.orders,
+          orders: state.bidSide.orders.slice(0, 15),
         },
         maximumOrderSize: maxBidTotal > maxAskTotal ? maxBidTotal : maxAskTotal,
       };

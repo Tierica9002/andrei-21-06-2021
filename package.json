@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "npm run watch:css && webpack",
+    "build": "npm run watch:css && webpack --mode=production",
     "test": "jest",
     "test:coverage": "jest --coverage",
     "start": "npm run watch:css && webpack serve",

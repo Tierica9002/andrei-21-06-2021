@@ -102,7 +102,7 @@ const useOrderBook = (): [OrderBookState, React.Dispatch<OrderBookAction>] => {
         safeDispatch({
           type: "flush_to_dom",
         });
-      }, 1000);
+      }, 300);
     }
   }, [wsConn.current?.readyState]);
 

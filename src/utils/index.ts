@@ -1,8 +1,11 @@
 import { Order, SortDirections } from "screens/OrderBook/types";
 
 // maybe save data in a closure so we don't pass number of decimals each time
-export const formatNumber = (nr: number, decimals: number): string => {
-  return "";
+export const formatNumber = (nr: number): string => {
+  return nr.toLocaleString(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
 };
 
 // could have used normal sort function, but this function is called very often

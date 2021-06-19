@@ -36,7 +36,7 @@ const initialState: OrderBookState = {
   askSide: {
     orders: [],
   },
-  productID: ProductIDs.PI_XBTUSD,
+  productID: ProductIDs.PI_ETHUSD,
   tickSize: 0.5,
   grouping: groupings.ETH,
   isLoading: false,
@@ -54,64 +54,56 @@ const orderBookReducer = (
   action: OrderBookAction
 ): OrderBookState => {
   switch (action.type) {
-    case "toggle_feed": {
+    case "set_loading": {
       return {
         ...state,
+        isLoading: action.payload,
+      };
+    }
+    case "toggle_feed": {
+      return {
+        ...initialState,
         productID: nextProduct[state.productID],
+        isLoading: true,
       };
     }
     case "update_data": {
+      if (state.isLoading) {
+        return state;
+      }
       const { bids, asks } = action.payload;
-
       const { bidSide, askSide } = state;
       const mergedBidOrders = mergeDelta(
         bidSide.orders,
         bids,
-        SortDirections.DESC
+        SortDirections.ASC
       );
       const mergedAskOrders = mergeDelta(
         askSide.orders,
         asks,
-        SortDirections.ASC
+        SortDirections.DESC
       );
-
-      const bidOrdersWithTotal = totalCalculator(mergedBidOrders);
-      const askOrdersWithTotal = totalCalculator(mergedAskOrders);
-
       return {
         ...state,
-        askSide: { orders: askOrdersWithTotal },
-        bidSide: { orders: bidOrdersWithTotal },
-      };
-    }
-    case "set_initial_data": {
-      const { bids, asks } = action.payload;
-      const bidOrdersWithTotal = totalCalculator(bids);
-      const askOrdersWithTotal = totalCalculator(asks);
-
-      const maxBidTotal = bidOrdersWithTotal[14].total;
-      const maxAskTotal = askOrdersWithTotal[14].total;
-
-      return {
-        ...state,
-        askSide: { orders: asks },
-        bidSide: { orders: bids },
-        renderedAskSide: { orders: askOrdersWithTotal },
-        renderedBidSide: { orders: bidOrdersWithTotal },
-        maximumOrderSize: maxBidTotal > maxAskTotal ? maxBidTotal : maxAskTotal,
+        askSide: { orders: mergedAskOrders },
+        bidSide: { orders: mergedBidOrders },
       };
     }
     case "flush_to_dom": {
-      const maxBidTotal = state.bidSide.orders[14].total;
-      const maxAskTotal = state.askSide.orders[14].total;
+      const { nrOfItems } = action.payload;
+
+      const bidOrdersWithTotal = totalCalculator(state.bidSide.orders);
+      const askOrdersWithTotal = totalCalculator(state.askSide.orders);
+      const maxBidTotal = bidOrdersWithTotal[nrOfItems - 1]?.total;
+      const maxAskTotal = askOrdersWithTotal[nrOfItems - 1]?.total;
 
       return {
         ...state,
         renderedAskSide: {
-          orders: state.askSide.orders.slice(0, 15),
+          orders: askOrdersWithTotal.slice(0, nrOfItems),
         },
         renderedBidSide: {
-          orders: state.bidSide.orders.slice(0, 15),
+          orders: bidOrdersWithTotal.slice(0, nrOfItems),
         },
         maximumOrderSize: maxBidTotal > maxAskTotal ? maxBidTotal : maxAskTotal,
       };

@@ -39,6 +39,20 @@ const orderConverter = (rawOrderData: Array<RawOrderData>): Order[] => {
   );
 };
 
+const useToggleFeed = (
+  wsConn: WebSocket | null,
+  interval: number,
+  productID: ProductIDs
+): void => {
+  React.useEffect(() => {
+    interval && clearInterval(interval);
+    if (wsConn?.readyState === WebSocket.OPEN) {
+      wsConn.send(websocketEvents.unsubscribe(nextProduct[productID]));
+      wsConn.send(websocketEvents.subscribe(productID));
+    }
+  }, [productID]);
+};
+
 const useOrderBook = (): [OrderBookState, React.Dispatch<OrderBookAction>] => {
   const [state, unSafeDispatch] = React.useReducer(
     orderBookReducer,
@@ -48,6 +62,9 @@ const useOrderBook = (): [OrderBookState, React.Dispatch<OrderBookAction>] => {
   const safeDispatch = useSafeDispatch(unSafeDispatch);
   // move this somewhere else
   const wsConn = React.useRef<WebSocket | null>(null);
+  const batchingInterval = React.useRef<number>(0);
+
+  useToggleFeed(wsConn.current, batchingInterval.current, state.productID);
 
   const messageHandler = (e: any) => {
     const wsMessage = JSON.parse(e.data);
@@ -56,25 +73,32 @@ const useOrderBook = (): [OrderBookState, React.Dispatch<OrderBookAction>] => {
       const askOrders = orderConverter(wsMessage.asks);
 
       safeDispatch({
-        type: "set_initial_data",
-        payload: {
-          bids: bidOrders,
-          asks: askOrders,
-        },
-      });
-    } else if (
-      wsMessage.feed === "book_ui_1" &&
-      wsMessage.product_id === state.productID
-    ) {
-      const bidOrders = orderConverter(wsMessage.bids);
-      const askOrders = orderConverter(wsMessage.asks);
-
-      safeDispatch({
         type: "update_data",
         payload: {
           bids: bidOrders.reverse(),
-          asks: askOrders,
+          asks: askOrders.reverse(),
         },
+      });
+      safeDispatch({
+        type: "flush_to_dom",
+        payload: {
+          nrOfItems: 25,
+        },
+      });
+    } else if (wsMessage.feed === "book_ui_1" && wsMessage.product_id) {
+      const bidOrders = orderConverter(wsMessage.bids);
+      const askOrders = orderConverter(wsMessage.asks);
+      safeDispatch({
+        type: "update_data",
+        payload: {
+          bids: bidOrders,
+          asks: askOrders.reverse(),
+        },
+      });
+    } else if (wsMessage?.event === "subscribed") {
+      safeDispatch({
+        type: "set_loading",
+        payload: false,
       });
     }
   };
@@ -88,23 +112,16 @@ const useOrderBook = (): [OrderBookState, React.Dispatch<OrderBookAction>] => {
 
   React.useEffect(() => {
     if (wsConn.current?.readyState === WebSocket.OPEN) {
-      wsConn.current.send(
-        websocketEvents.subscribe(nextProduct[state.productID])
-      );
-
-      wsConn.current.send(websocketEvents.unsubscribe(state.productID));
-    }
-  }, [state.productID]);
-
-  React.useEffect(() => {
-    if (wsConn.current?.readyState === WebSocket.OPEN) {
-      setInterval(() => {
+      batchingInterval.current = window.setInterval(() => {
         safeDispatch({
           type: "flush_to_dom",
+          payload: {
+            nrOfItems: 25,
+          },
         });
-      }, 300);
+      }, 100);
     }
-  }, [wsConn.current?.readyState]);
+  }, [wsConn.current?.readyState, state.productID]);
 
   return [state, safeDispatch];
 };

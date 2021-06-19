@@ -3,6 +3,7 @@ import { SortDirections, Order, Sides } from "./types";
 import TableHeader from "components/TableHeader";
 import TableRow from "components/TableRow";
 import ProgressBarContainer from "components/ProgressBarContainer";
+import { formatNumber } from "utils/index";
 
 export interface OrderBookSideProps {
   sort: SortDirections;
@@ -27,19 +28,20 @@ const OrderBookSide = ({
       {rows.map((order) => {
         return (
           <ProgressBarContainer
+            key={"2"}
             progress={100 * (order.total / maxOrderSize)}
             color={side === Sides.BID ? "green" : "red"}
             direction={side === Sides.BID ? "ltr" : "rtl"}
           >
             <TableRow>
               <div className="flex-1 text-right text-white pr-12">
-                {order.price}
+                {formatNumber(order.price)}
               </div>
               <div className="flex-1 text-right text-white pr-12">
-                {order.size}
+                {formatNumber(order.size)}
               </div>
               <div className="flex-1 text-right text-white pr-12">
-                {order.total}
+                {formatNumber(order.total)}
               </div>
             </TableRow>
           </ProgressBarContainer>

@@ -221,12 +221,12 @@ describe("mergeDelta", () => {
   ];
 
   it("sorts 2 sorted arrays ascendent", () => {
-    const sortedArr = mergeDelta(arr1Asc, arr2Asc, SortDirections.ASC);
-    expect(sortedArr).toEqual(expectedArr1Arr2Asc);
+    const got = mergeDelta(arr1Asc, arr2Asc, SortDirections.ASC);
+    expect(got).toEqual(expectedArr1Arr2Asc);
   });
 
   it("sorts 2 sorted arrays descendend", () => {
-    const sortedArr = mergeDelta(arr1Desc, arr2Desc, SortDirections.DESC);
-    expect(sortedArr).toEqual(expectedArr1Arr2Desc);
+    const got = mergeDelta(arr1Desc, arr2Desc, SortDirections.DESC);
+    expect(got).toEqual(expectedArr1Arr2Desc);
   });
 });

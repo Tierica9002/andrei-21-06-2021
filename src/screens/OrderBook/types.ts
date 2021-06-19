@@ -14,7 +14,7 @@ export interface OrderBookState {
   productID: ProductIDs;
   tickSize: number;
   grouping: number[];
-  isLoading: false;
+  isLoading: boolean;
   maximumOrderSize: number;
   renderedBidSide: OrderBookSide;
   renderedAskSide: OrderBookSide;
@@ -25,12 +25,14 @@ export type OrderBookAction =
       type: "update_data";
       payload: { bids: Array<Order>; asks: Array<Order> };
     }
-  | {
-      type: "set_initial_data";
-      payload: { bids: Array<Order>; asks: Array<Order> };
-    }
   | { type: "toggle_feed" }
-  | { type: "flush_to_dom" };
+  | {
+      type: "flush_to_dom";
+      payload: {
+        nrOfItems: number;
+      };
+    }
+  | { type: "set_loading"; payload: boolean };
 
 export enum ProductIDs {
   PI_XBTUSD = "PI_XBTUSD",

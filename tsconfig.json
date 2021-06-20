@@ -21,9 +21,10 @@
         "jsx": "react-jsx",
         "baseUrl": "src",
         "paths": {
+            "components": ["components/*"],
+            "context": ["context/*"],
             "utils": ["utils/*"],
             "screens": ["screens/*"],
-            "components": ["components/*"],
           }
     },
     "include": [

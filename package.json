@@ -7,6 +7,7 @@
     "build": "npm run watch:css && webpack --mode=production",
     "test": "jest",
     "test:coverage": "jest --coverage",
+    "test:watch": "jest --watch",
     "start": "npm run watch:css && webpack serve",
     "watch:css": "postcss src/assets/tailwind.css -o src/assets/output.css"
   },
@@ -20,6 +21,7 @@
     "@testing-library/jest-dom": "^5.14.1",
     "@testing-library/react": "^11.2.7",
     "@testing-library/user-event": "^13.1.9",
+    "@types/big.js": "^6.1.1",
     "@types/jest": "^26.0.23",
     "@types/react-router-dom": "^5.1.7",
     "@typescript-eslint/eslint-plugin": "^4.26.0",
@@ -48,6 +50,7 @@
   "dependencies": {
     "@types/react": "^17.0.9",
     "@types/react-dom": "^17.0.6",
+    "big.js": "^6.1.1",
     "identity-obj-proxy": "^3.0.0",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
@@ -59,8 +62,9 @@
       "\\.(css|less)$": "identity-obj-proxxy",
       "\\.(jpg|jpeg|png|svg)$": "<rootDir>/__mocks__/fileMock.js",
       "^components/(.*)$": "<rootDir>/src/components/$1",
-      "^screens/(.*)$":  "<rootDir>/src/screens/$1",
-      "^utils/(.*)$":  "<rootDir>/src/utils/$1"
+      "^context/(.*)$": "<rootDir>/src/context/$1",
+      "^screens/(.*)$": "<rootDir>/src/screens/$1",
+      "^utils/(.*)$": "<rootDir>/src/utils/$1"
     },
     "setupFilesAfterEnv": [
       "<rootDir>/jest-setup.js"

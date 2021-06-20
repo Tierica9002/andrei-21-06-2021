@@ -1,4 +1,4 @@
-import { Order, SortDirections } from "screens/OrderBook/types";
+import { Order } from "screens/OrderBook/types";
 
 // maybe save data in a closure so we don't pass number of decimals each time
 export const formatNumber = (nr: number): string => {
@@ -37,4 +37,18 @@ export const mergeDelta = (
     .concat(initial.slice(i))
     .concat(delta.slice(j))
     .filter((item) => item.size !== 0);
+};
+export const debounce = <T extends (...args: any[]) => any>(
+  callback: T,
+  waitFor: number
+) => {
+  let timeout = 0;
+  return (...args: Parameters<T>): ReturnType<T> => {
+    let result: any;
+    window.clearTimeout(timeout);
+    timeout = window.setTimeout(() => {
+      result = callback(...args);
+    }, waitFor);
+    return result;
+  };
 };

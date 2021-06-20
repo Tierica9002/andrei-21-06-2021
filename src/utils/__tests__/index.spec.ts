@@ -448,5 +448,44 @@ describe("groupBy", () => {
 
     const got4 = groupBy(unGroupedArr4, "2.5");
     expect(got4).toEqual(expected4);
+
+    const unGroupedArr5 = [
+      {
+        price: 2250.3,
+        size: 100,
+        total: 0,
+      },
+      {
+        price: 2250.7,
+        size: 50,
+        total: 0,
+      },
+      {
+        price: 2250.8,
+        size: 120,
+        total: 0,
+      },
+    ];
+
+    const expected5 = [
+      {
+        price: 2250.3,
+        size: 100,
+        total: 0,
+      },
+      {
+        price: 2250.7,
+        size: 50,
+        total: 0,
+      },
+      {
+        price: 2250.8,
+        size: 120,
+        total: 0,
+      },
+    ];
+
+    const got5 = groupBy(unGroupedArr5, "0.05");
+    expect(got5).toEqual(expected5);
   });
 });

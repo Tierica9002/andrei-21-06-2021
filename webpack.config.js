@@ -23,6 +23,7 @@ module.exports = () => {
       extensions: [".tsx", ".ts", ".js"],
       alias: {
         components: path.resolve(__dirname, "src/components"),
+        context: path.resolve(__dirname, "src/context "),
         screens: path.resolve(__dirname, "src/screens"),
         utils: path.resolve(__dirname, "src/utils"),
       },
@@ -30,11 +31,6 @@ module.exports = () => {
     devServer: { contentBase: path.join(__dirname, "src") },
     module: {
       rules: [
-        {
-          test: /\.(js|jsx)$/,
-          exclude: /node_modules/,
-          use: ["babel-loader"],
-        },
         {
           test: /\.(ts|tsx)$/,
           exclude: /node_modules/,

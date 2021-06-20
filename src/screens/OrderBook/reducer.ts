@@ -1,10 +1,6 @@
-import {
-  OrderBookState,
-  SortDirections,
-  OrderBookAction,
-  ProductIDs,
-  Order,
-} from "./types";
+import Big from "big.js";
+
+import { OrderBookState, OrderBookAction, ProductIDs, Order } from "./types";
 import { mergeDelta } from "utils/index";
 
 const nextProduct = {
@@ -29,8 +25,13 @@ const groupBy = (orders: Order[], groupBy: string): Order[] => {
   const groupByNumber = parseFloat(groupBy);
   let groupedIndex = 0;
   for (let i = 0; i < orders.length; i++) {
-    const groupedPrice =
-      Math.floor(orders[i].price / groupByNumber) * groupByNumber;
+    // used Big due to floating point precision rounding errors
+    const groupedPrice = Number(
+      Big(orders[i].price)
+        .div(groupByNumber)
+        .round(0, Big.roundDown)
+        .times(groupByNumber)
+    );
 
     if (Number.isInteger(orders[i].price / groupByNumber)) {
       groupedArray.push(orders[i]);
@@ -64,7 +65,7 @@ const groupBy = (orders: Order[], groupBy: string): Order[] => {
   return groupedArray;
 };
 
-const groupings = {
+export const groupings = {
   [ProductIDs.PI_ETHUSD]: ["0.05", "0.1", "0.25"],
   [ProductIDs.PI_XBTUSD]: ["0.5", "1", "2.5"],
 };
@@ -80,6 +81,7 @@ const initialState: OrderBookState = {
   tickSize: "0.5",
   grouping: groupings[ProductIDs.PI_XBTUSD],
   isLoading: false,
+  errorMessage: "",
   maximumOrderSize: 0,
   renderedBidSide: {
     orders: [],
@@ -106,6 +108,7 @@ const orderBookReducer = (
         ...initialState,
         productID: nextProductID,
         grouping: groupings[nextProductID],
+        tickSize: groupings[nextProductID][0],
         isLoading: true,
       };
     }
@@ -118,15 +121,18 @@ const orderBookReducer = (
       const mergedBidOrders = mergeDelta(bidSide.orders, bids);
       const mergedAskOrders = mergeDelta(askSide.orders, asks);
 
-      return {
-        ...state,
-        askSide: { orders: mergedAskOrders },
-        bidSide: { orders: mergedBidOrders },
-      };
+      // unorthodox use of reducer to block rerenders, the "by the book way" would have been
+      // to keep this data in some Ref so it doesn't triggers rerenders, but I felt that it overcomplicates the code
+      // also added a test for this in order to signal intent
+      state.askSide = { orders: mergedAskOrders };
+      state.bidSide = { orders: mergedBidOrders };
+
+      return state;
     }
-    case "flush_to_dom": {
+    case "render_data": {
       const { nrOfItems } = action.payload;
 
+      // reverse orders for display purposes
       const reversedBidOrders = [...state.bidSide.orders].reverse();
       const groupedBidOrders = groupBy(reversedBidOrders, state.tickSize);
       const bidOrdersWithTotal = totalCalculator(groupedBidOrders);
@@ -151,6 +157,12 @@ const orderBookReducer = (
       return {
         ...state,
         tickSize: action.payload,
+      };
+    }
+    case "update_feed_error": {
+      return {
+        ...state,
+        errorMessage: action.payload,
       };
     }
   }

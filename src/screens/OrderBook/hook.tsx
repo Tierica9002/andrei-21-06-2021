@@ -7,7 +7,7 @@ import {
   RawOrderData,
 } from "./types";
 import { useSafeDispatch } from "utils/hooks";
-import createWsConn from "utils/ws-client";
+import { useWebsocket } from "../../context/webSocket";
 import { orderBookReducer, initialState, nextProduct } from "./reducer";
 
 const websocketEvents = {
@@ -40,13 +40,13 @@ const orderConverter = (rawOrderData: Array<RawOrderData>): Order[] => {
 };
 
 const useToggleFeed = (
-  wsConn: WebSocket | null,
+  socket: WebSocket | null,
   productID: ProductIDs
 ): void => {
   React.useEffect(() => {
-    if (wsConn?.readyState === WebSocket.OPEN) {
-      wsConn.send(websocketEvents.unsubscribe(nextProduct[productID]));
-      wsConn.send(websocketEvents.subscribe(productID));
+    if (socket?.readyState === WebSocket.OPEN) {
+      socket.send(websocketEvents.unsubscribe(nextProduct[productID]));
+      socket.send(websocketEvents.subscribe(productID));
     }
   }, [productID]);
 };
@@ -58,70 +58,72 @@ const useOrderBook = (): [OrderBookState, React.Dispatch<OrderBookAction>] => {
   );
   // todo propertly type action args
   const safeDispatch = useSafeDispatch(unSafeDispatch);
-  // move this somewhere else
-  const wsConn = React.useRef<WebSocket | null>(null);
   const batchingInterval = React.useRef<number>(0);
+  const { conn } = useWebsocket();
 
-  useToggleFeed(wsConn.current, state.productID);
+  useToggleFeed(conn, state.productID);
 
-  const messageHandler = (e: any) => {
-    const wsMessage = JSON.parse(e.data);
-    if (wsMessage.feed === "book_ui_1_snapshot") {
-      const bidOrders = orderConverter(wsMessage.bids);
-      const askOrders = orderConverter(wsMessage.asks);
-
-      safeDispatch({
-        type: "update_data",
-        payload: {
-          bids: bidOrders.reverse(),
-          asks: askOrders,
-        },
-      });
-      safeDispatch({
-        type: "flush_to_dom",
-        payload: {
-          nrOfItems: 25,
-        },
-      });
-    } else if (wsMessage.feed === "book_ui_1" && wsMessage.product_id) {
-      const bidOrders = orderConverter(wsMessage.bids);
-      const askOrders = orderConverter(wsMessage.asks);
-      safeDispatch({
-        type: "update_data",
-        payload: {
-          bids: bidOrders,
-          asks: askOrders,
-        },
-      });
-    } else if (wsMessage?.event === "subscribed") {
-      safeDispatch({
-        type: "set_loading",
-        payload: false,
-      });
-    }
-  };
-
-  //todo refactor
-  React.useEffect(() => {
-    wsConn.current = createWsConn({
-      initialMessage: websocketEvents.subscribe(state.productID),
-      onMessage: messageHandler,
-    });
-  }, []);
-
-  React.useEffect(() => {
-    if (wsConn.current?.readyState === WebSocket.OPEN) {
+  const registerWsEventHandlers = () => {
+    conn?.addEventListener("open", () => {
+      conn.send(websocketEvents.subscribe(state.productID));
       batchingInterval.current && clearInterval(batchingInterval.current);
       batchingInterval.current = window.setInterval(() => {
         safeDispatch({
-          type: "flush_to_dom",
+          type: "render_data",
           payload: {
             nrOfItems: 25,
           },
         });
       }, 800);
-    }
-  }, [wsConn.current?.readyState, state.productID]);
+    });
+
+    conn?.addEventListener("message", (e) => {
+      const wsMessage = JSON.parse(e.data);
+      if (wsMessage.feed === "book_ui_1_snapshot") {
+        const bidOrders = orderConverter(wsMessage.bids);
+        const askOrders = orderConverter(wsMessage.asks);
+
+        safeDispatch({
+          type: "update_data",
+          payload: {
+            bids: bidOrders.reverse(),
+            asks: askOrders,
+          },
+        });
+        safeDispatch({
+          type: "render_data",
+          payload: {
+            nrOfItems: 25,
+          },
+        });
+      } else if (wsMessage.feed === "book_ui_1" && wsMessage.product_id) {
+        const bidOrders = orderConverter(wsMessage.bids);
+        const askOrders = orderConverter(wsMessage.asks);
+        safeDispatch({
+          type: "update_data",
+          payload: {
+            bids: bidOrders,
+            asks: askOrders,
+          },
+        });
+      } else if (wsMessage?.event === "subscribed") {
+        safeDispatch({
+          type: "set_loading",
+          payload: false,
+        });
+        safeDispatch({
+          type: "render_data",
+          payload: {
+            nrOfItems: 25,
+          },
+        });
+      }
+    });
+  };
+
+  React.useEffect(() => {
+    registerWsEventHandlers();
+  }, [conn]);
 
   return [state, safeDispatch];
 };

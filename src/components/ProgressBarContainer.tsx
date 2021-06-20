@@ -14,30 +14,20 @@ const ProgressBarContainer = ({
   children,
 }: ProgressBarContainerInterface): JSX.Element => {
   const container = React.useRef<HTMLDivElement>(null);
-  const [width, setWidth] = React.useState(0);
-
-  React.useEffect(() => {
-    if (container && container.current) {
-      setWidth(container.current.offsetWidth * (progress / 100));
-    } else {
-      setWidth(0);
-    }
-  }, [container.current]);
-
-  const cssDirection = direction === "ltr" ? "left-0" : "right-0";
-  const cssColor = `bg-${color}-900`;
+  const transformSign = direction === "ltr" ? "-" : "";
 
   return (
-    <div ref={container} className="relative w-100 h-5">
+    <div ref={container} className="relative w-full h-5 overflow-hidden">
       <div className="relative z-10">{children}</div>
       <div
         style={{
-          width:
-            container && container.current
-              ? container.current.offsetWidth * (progress / 100)
-              : 0,
+          transform: `translate3d(${transformSign}${100 - progress}%, 0, 0px)`,
         }}
-        className={`${cssDirection} ${cssColor} absolute top-0 z-indez-0 w-0 h-5`}
+        className={`${color === "red" ? `bg-red-900` : "bg-green-900"} ${
+          direction === "ltr" ? "-translate-x-full" : "translate-x-full"
+        } ${
+          color === "red" ? "bg-red-900" : "bg-green-900"
+        } absolute top-0 z-indez-0 w-full h-5 transform-gpu`}
       ></div>
     </div>
   );

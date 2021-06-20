@@ -2,6 +2,7 @@ import React from "react";
 
 interface DropdownProps {
   options: string[];
+  prefix?: string;
   onChange?: (val: string) => void;
   selectedOption: string;
 }
@@ -10,6 +11,7 @@ const Dropdown = ({
   options,
   onChange,
   selectedOption,
+  prefix = "",
 }: DropdownProps): JSX.Element => {
   const [isOpen, setIsOpen] = React.useState(false);
   return (
@@ -17,12 +19,13 @@ const Dropdown = ({
       <div>
         <button
           type="button"
-          className="inline-flex justify-center w-full rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-indigo-500"
+          className="inline-flex justify-center w-full rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-gray-800 text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-indigo-500"
           id="menu-button"
           aria-expanded="true"
           aria-haspopup="true"
           onClick={() => setIsOpen((prevState) => !prevState)}
         >
+          {prefix}
           {selectedOption}
           <svg
             className="-mr-1 ml-2 h-5 w-5"
@@ -41,7 +44,7 @@ const Dropdown = ({
       </div>
       {isOpen && (
         <div
-          className="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none"
+          className="origin-top-right absolute right-0 mt-2 w-32 rounded-md shadow-lg bg-gray-800 ring-1 ring-black ring-opacity-5 focus:outline-none"
           role="menu"
           aria-orientation="vertical"
           aria-labelledby="menu-button"
@@ -50,7 +53,8 @@ const Dropdown = ({
           <div className="py-1 cursor-pointer" role="none">
             {options.map((option) => (
               <div
-                className="text-gray-700 px-4 py-2 text-sm"
+                key={option}
+                className="text-white px-4 py-2 text-sm text-right"
                 role="menuitem"
                 tabIndex={-1}
                 id="menu-item-0"

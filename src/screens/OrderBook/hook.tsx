@@ -41,11 +41,9 @@ const orderConverter = (rawOrderData: Array<RawOrderData>): Order[] => {
 
 const useToggleFeed = (
   wsConn: WebSocket | null,
-  interval: number,
   productID: ProductIDs
 ): void => {
   React.useEffect(() => {
-    interval && clearInterval(interval);
     if (wsConn?.readyState === WebSocket.OPEN) {
       wsConn.send(websocketEvents.unsubscribe(nextProduct[productID]));
       wsConn.send(websocketEvents.subscribe(productID));
@@ -64,7 +62,7 @@ const useOrderBook = (): [OrderBookState, React.Dispatch<OrderBookAction>] => {
   const wsConn = React.useRef<WebSocket | null>(null);
   const batchingInterval = React.useRef<number>(0);
 
-  useToggleFeed(wsConn.current, batchingInterval.current, state.productID);
+  useToggleFeed(wsConn.current, state.productID);
 
   const messageHandler = (e: any) => {
     const wsMessage = JSON.parse(e.data);
@@ -76,7 +74,7 @@ const useOrderBook = (): [OrderBookState, React.Dispatch<OrderBookAction>] => {
         type: "update_data",
         payload: {
           bids: bidOrders.reverse(),
-          asks: askOrders.reverse(),
+          asks: askOrders,
         },
       });
       safeDispatch({
@@ -92,7 +90,7 @@ const useOrderBook = (): [OrderBookState, React.Dispatch<OrderBookAction>] => {
         type: "update_data",
         payload: {
           bids: bidOrders,
-          asks: askOrders.reverse(),
+          asks: askOrders,
         },
       });
     } else if (wsMessage?.event === "subscribed") {
@@ -103,6 +101,7 @@ const useOrderBook = (): [OrderBookState, React.Dispatch<OrderBookAction>] => {
     }
   };
 
+  //todo refactor
   React.useEffect(() => {
     wsConn.current = createWsConn({
       initialMessage: websocketEvents.subscribe(state.productID),
@@ -112,6 +111,7 @@ const useOrderBook = (): [OrderBookState, React.Dispatch<OrderBookAction>] => {
 
   React.useEffect(() => {
     if (wsConn.current?.readyState === WebSocket.OPEN) {
+      batchingInterval.current && clearInterval(batchingInterval.current);
       batchingInterval.current = window.setInterval(() => {
         safeDispatch({
           type: "flush_to_dom",
@@ -119,7 +119,7 @@ const useOrderBook = (): [OrderBookState, React.Dispatch<OrderBookAction>] => {
             nrOfItems: 25,
           },
         });
-      }, 100);
+      }, 800);
     }
   }, [wsConn.current?.readyState, state.productID]);
 

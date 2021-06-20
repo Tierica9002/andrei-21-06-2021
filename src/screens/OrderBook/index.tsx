@@ -4,18 +4,27 @@ import Button from "components/Button";
 import SwitchHorizontal from "components/icons/SwitchHorizontal";
 import OrderBookSide from "screens/OrderBook/OrderBookSide";
 import useOrderBook from "screens/OrderBook/hook";
+import Dropdown from "components/Dropdown";
 
 // should contain 2x orderbook sides
 // buttons & headings
 const OrderBook = () => {
   const [state, dispatch] = useOrderBook();
-
   return (
     <div className="w-100 bg-gray-900">
       <div>
-        <div>
+        <div className="flex justify-between">
           <h1 className="text-white text-2xl">Order Book</h1>
-          {/* <Dropdown options={options} onChange={} value={} /> */}
+          <Dropdown
+            options={state.grouping}
+            onChange={(value) => {
+              dispatch({
+                type: "change_tick_size",
+                payload: value,
+              });
+            }}
+            selectedOption={state.tickSize}
+          />
         </div>
         <div className="flex items-stretch">
           <div className="flex-1">

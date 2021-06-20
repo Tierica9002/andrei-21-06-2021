@@ -13,38 +13,23 @@ export const formatNumber = (nr: number): string => {
 // Time complexity is O(m+n) as oposed to normal sort which is O((m+n)(log m+n))
 export const mergeDelta = (
   initial: Array<Order>,
-  delta: Array<Order>,
-  sortDirection: SortDirections
+  delta: Array<Order>
 ): Array<Order> => {
   const result = [];
   let i = 0;
   let j = 0;
 
   while (i < initial.length && j < delta.length) {
-    if (sortDirection === SortDirections.ASC) {
-      if (initial[i].price < delta[j].price) {
-        result.push(initial[i]);
-        i++;
-      } else if (initial[i].price > delta[j].price) {
-        result.push(delta[j]);
-        j++;
-      } else {
-        result.push(delta[j]);
-        j++;
-        i++;
-      }
+    if (initial[i].price < delta[j].price) {
+      result.push(initial[i]);
+      i++;
+    } else if (initial[i].price > delta[j].price) {
+      result.push(delta[j]);
+      j++;
     } else {
-      if (initial[i].price > delta[j].price) {
-        result.push(initial[i]);
-        i++;
-      } else if (initial[i].price < delta[j].price) {
-        result.push(delta[j]);
-        j++;
-      } else {
-        result.push(delta[j]);
-        j++;
-        i++;
-      }
+      result.push(delta[j]);
+      j++;
+      i++;
     }
   }
 

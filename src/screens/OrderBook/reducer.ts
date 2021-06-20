@@ -24,9 +24,49 @@ const totalCalculator = (orders: Order[]): Order[] => {
   });
 };
 
+const groupBy = (orders: Order[], groupBy: string): Order[] => {
+  const groupedArray: Order[] = [];
+  const groupByNumber = parseFloat(groupBy);
+  let groupedIndex = 0;
+  for (let i = 0; i < orders.length; i++) {
+    const groupedPrice =
+      Math.floor(orders[i].price / groupByNumber) * groupByNumber;
+
+    if (Number.isInteger(orders[i].price / groupByNumber)) {
+      groupedArray.push(orders[i]);
+      groupedIndex++;
+    } else {
+      if (i === 0) {
+        groupedArray.push({
+          ...orders[i],
+          price: groupedPrice,
+        });
+        groupedIndex++;
+      } else {
+        const prevItem = groupedArray[groupedIndex - 1];
+
+        if (prevItem.price === groupedPrice) {
+          groupedArray[groupedIndex - 1] = {
+            ...prevItem,
+            size: orders[i].size + prevItem.size,
+          };
+        } else {
+          groupedArray.push({
+            ...orders[i],
+            price: groupedPrice,
+          });
+          groupedIndex++;
+        }
+      }
+    }
+  }
+
+  return groupedArray;
+};
+
 const groupings = {
-  ETH: [0.05, 0.1, 0.25],
-  XBT: [0.5, 1, 2.5],
+  [ProductIDs.PI_ETHUSD]: ["0.05", "0.1", "0.25"],
+  [ProductIDs.PI_XBTUSD]: ["0.5", "1", "2.5"],
 };
 
 const initialState: OrderBookState = {
@@ -36,9 +76,9 @@ const initialState: OrderBookState = {
   askSide: {
     orders: [],
   },
-  productID: ProductIDs.PI_ETHUSD,
-  tickSize: 0.5,
-  grouping: groupings.ETH,
+  productID: ProductIDs.PI_XBTUSD,
+  tickSize: "0.5",
+  grouping: groupings[ProductIDs.PI_XBTUSD],
   isLoading: false,
   maximumOrderSize: 0,
   renderedBidSide: {
@@ -61,9 +101,11 @@ const orderBookReducer = (
       };
     }
     case "toggle_feed": {
+      const nextProductID = nextProduct[state.productID];
       return {
         ...initialState,
-        productID: nextProduct[state.productID],
+        productID: nextProductID,
+        grouping: groupings[nextProductID],
         isLoading: true,
       };
     }
@@ -73,16 +115,9 @@ const orderBookReducer = (
       }
       const { bids, asks } = action.payload;
       const { bidSide, askSide } = state;
-      const mergedBidOrders = mergeDelta(
-        bidSide.orders,
-        bids,
-        SortDirections.ASC
-      );
-      const mergedAskOrders = mergeDelta(
-        askSide.orders,
-        asks,
-        SortDirections.DESC
-      );
+      const mergedBidOrders = mergeDelta(bidSide.orders, bids);
+      const mergedAskOrders = mergeDelta(askSide.orders, asks);
+
       return {
         ...state,
         askSide: { orders: mergedAskOrders },
@@ -92,9 +127,13 @@ const orderBookReducer = (
     case "flush_to_dom": {
       const { nrOfItems } = action.payload;
 
-      const bidOrdersWithTotal = totalCalculator(state.bidSide.orders);
-      const askOrdersWithTotal = totalCalculator(state.askSide.orders);
+      const reversedBidOrders = [...state.bidSide.orders].reverse();
+      const groupedBidOrders = groupBy(reversedBidOrders, state.tickSize);
+      const bidOrdersWithTotal = totalCalculator(groupedBidOrders);
       const maxBidTotal = bidOrdersWithTotal[nrOfItems - 1]?.total;
+
+      const groupedAskOrders = groupBy(state.askSide.orders, state.tickSize);
+      const askOrdersWithTotal = totalCalculator(groupedAskOrders);
       const maxAskTotal = askOrdersWithTotal[nrOfItems - 1]?.total;
 
       return {
@@ -108,7 +147,13 @@ const orderBookReducer = (
         maximumOrderSize: maxBidTotal > maxAskTotal ? maxBidTotal : maxAskTotal,
       };
     }
+    case "change_tick_size": {
+      return {
+        ...state,
+        tickSize: action.payload,
+      };
+    }
   }
 };
 
-export { orderBookReducer, initialState, nextProduct };
+export { orderBookReducer, initialState, nextProduct, groupBy };

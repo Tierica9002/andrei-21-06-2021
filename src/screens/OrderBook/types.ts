@@ -12,8 +12,8 @@ export interface OrderBookState {
   bidSide: OrderBookSide;
   askSide: OrderBookSide;
   productID: ProductIDs;
-  tickSize: number;
-  grouping: number[];
+  tickSize: string;
+  grouping: string[];
   isLoading: boolean;
   maximumOrderSize: number;
   renderedBidSide: OrderBookSide;
@@ -32,7 +32,8 @@ export type OrderBookAction =
         nrOfItems: number;
       };
     }
-  | { type: "set_loading"; payload: boolean };
+  | { type: "set_loading"; payload: boolean }
+  | { type: "change_tick_size"; payload: string };
 
 export enum ProductIDs {
   PI_XBTUSD = "PI_XBTUSD",

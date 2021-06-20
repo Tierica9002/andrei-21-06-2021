@@ -25,7 +25,7 @@ const ProgressBarContainer = ({
   }, [container.current]);
 
   const cssDirection = direction === "ltr" ? "left-0" : "right-0";
-  const cssColor = `bg-${color}-300`;
+  const cssColor = `bg-${color}-900`;
 
   return (
     <div ref={container} className="relative w-100 h-5">

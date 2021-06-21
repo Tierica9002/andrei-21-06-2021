@@ -758,6 +758,10 @@ video {
   padding-top: 1rem;
 }
 
+.pr-6 {
+  padding-right: 1.5rem;
+}
+
 .pr-12 {
   padding-right: 3rem;
 }
@@ -874,6 +878,10 @@ video {
 
 .uppercase {
   text-transform: uppercase;
+}
+
+.w-0 {
+  width: 0px;
 }
 
 .w-5 {

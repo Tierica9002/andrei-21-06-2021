@@ -31,7 +31,7 @@ const OrderBookSide = ({
         <TableHeader reverse={reverseCols}>
           <div className="flex-1 text-right text-gray-400 pr-12">Price</div>
           <div className="flex-1 text-right text-gray-400 pr-12">Size</div>
-          <div className="flex-1 text-right text-gray-400 pr-12">Total</div>
+          <div className="flex-1 text-right text-gray-400 pr-6">Total</div>
         </TableHeader>
       )}
       {sortedRows.map((order, index) => {
@@ -43,13 +43,13 @@ const OrderBookSide = ({
             direction={direction}
           >
             <TableRow reverse={reverseCols}>
-              <div className="flex-1 text-right text-green-500 text-white pr-12">
+              <div className="flex-1 text-right text-green-500 text-white pr-12 w-0">
                 {formatNumber(order.price)}
               </div>
-              <div className="flex-1 text-right text-white pr-12">
+              <div className="flex-1 text-right text-white pr-12 w-0">
                 {formatNumber(order.size)}
               </div>
-              <div className="flex-1 text-right text-white pr-12">
+              <div className="flex-1 text-right text-white pr-6 w-0`">
                 {formatNumber(order.total)}
               </div>
             </TableRow>

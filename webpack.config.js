@@ -3,7 +3,7 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 const webpack = require("webpack");
 const dotenv = require("dotenv");
 
-module.exports = () => {
+module.exports = (en) => {
   const env = dotenv.config().parsed || {};
 
   // reduce it to a nice object, the same as before
@@ -11,6 +11,10 @@ module.exports = () => {
     prev[`process.env.${next}`] = JSON.stringify(env[next]);
     return prev;
   }, {});
+
+  if (!envKeys["process.env.WS_URL"]) {
+    envKeys["process.env.WS_URL"] = process.env.WS_URL;
+  }
 
   return {
     entry: "./src/index.tsx",

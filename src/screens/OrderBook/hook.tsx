@@ -10,6 +10,9 @@ import { useSafeDispatch } from "utils/hooks";
 import { useWebsocket } from "../../context/webSocket";
 import { orderBookReducer, initialState, nextProduct } from "./reducer";
 
+const BATCHING_TIME = 800;
+const NR_OF_ITEMS = 25;
+
 const websocketEvents = {
   subscribe: (productID: ProductIDs) =>
     JSON.stringify({
@@ -71,10 +74,10 @@ const useOrderBook = (): [OrderBookState, React.Dispatch<OrderBookAction>] => {
         safeDispatch({
           type: "render_data",
           payload: {
-            nrOfItems: 25,
+            nrOfItems: NR_OF_ITEMS,
           },
         });
-      }, 800);
+      }, BATCHING_TIME);
     });
 
     conn?.addEventListener("message", (e) => {

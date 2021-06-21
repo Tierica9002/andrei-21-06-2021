@@ -6,7 +6,8 @@ import ProgressBarContainer from "components/ProgressBarContainer";
 import { formatNumber } from "utils/index";
 
 export interface OrderBookSideProps {
-  reverse?: boolean;
+  reverseRows?: boolean;
+  reverseCols?: boolean;
   showHeader?: boolean;
   rows: Order[];
   maxOrderSize: number;
@@ -15,25 +16,24 @@ export interface OrderBookSideProps {
 }
 
 const OrderBookSide = ({
-  reverse = false,
+  reverseRows = false,
+  reverseCols = false,
   direction,
   color,
   rows,
   maxOrderSize,
   showHeader = true,
 }: OrderBookSideProps): JSX.Element => {
-  const sortedRows = reverse ? rows.slice().reverse() : rows;
+  const sortedRows = reverseRows ? rows.slice().reverse() : rows;
   return (
     <>
-      <TableHeader>
-        {showHeader && (
-          <>
-            <div className="flex-1 text-right text-gray-400 pr-12">Price</div>
-            <div className="flex-1 text-right text-gray-400 pr-12">Size</div>
-            <div className="flex-1 text-right text-gray-400 pr-12">Total</div>
-          </>
-        )}
-      </TableHeader>
+      {showHeader && (
+        <TableHeader reverse={reverseCols}>
+          <div className="flex-1 text-right text-gray-400 pr-12">Price</div>
+          <div className="flex-1 text-right text-gray-400 pr-12">Size</div>
+          <div className="flex-1 text-right text-gray-400 pr-12">Total</div>
+        </TableHeader>
+      )}
       {sortedRows.map((order, index) => {
         return (
           <ProgressBarContainer
@@ -42,7 +42,7 @@ const OrderBookSide = ({
             color={color}
             direction={direction}
           >
-            <TableRow>
+            <TableRow reverse={reverseCols}>
               <div className="flex-1 text-right text-green-500 text-white pr-12">
                 {formatNumber(order.price)}
               </div>

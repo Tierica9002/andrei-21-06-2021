@@ -65,7 +65,7 @@ const groupBy = (orders: Order[], groupBy: string): Order[] => {
   return groupedArray;
 };
 
-export const groupings = {
+const groupings = {
   [ProductIDs.PI_ETHUSD]: ["0.05", "0.1", "0.25"],
   [ProductIDs.PI_XBTUSD]: ["0.5", "1", "2.5"],
 };
@@ -122,7 +122,7 @@ const orderBookReducer = (
       const mergedAskOrders = mergeDelta(askSide.orders, asks);
 
       // unorthodox use of reducer to block rerenders, the "by the book way" would have been
-      // to keep this data in some Ref so it doesn't triggers rerenders, but I felt that it overcomplicates the code
+      // to keep this data in some Ref so it doesn't trigger any rerenders, but I felt that it overcomplicates the code
       // also added a test for this in order to signal intent
       state.askSide = { orders: mergedAskOrders };
       state.bidSide = { orders: mergedBidOrders };
@@ -132,13 +132,13 @@ const orderBookReducer = (
     case "render_data": {
       const { nrOfItems } = action.payload;
 
-      // reverse orders for display purposes
-      const reversedBidOrders = [...state.bidSide.orders].reverse();
-      const groupedBidOrders = groupBy(reversedBidOrders, state.tickSize);
+      const groupedBidOrders = groupBy(state.bidSide.orders, state.tickSize);
       const bidOrdersWithTotal = totalCalculator(groupedBidOrders);
       const maxBidTotal = bidOrdersWithTotal[nrOfItems - 1]?.total;
 
-      const groupedAskOrders = groupBy(state.askSide.orders, state.tickSize);
+      // reverse orders for display purposes
+      const reversedAskSideOrders = [...state.askSide.orders].reverse();
+      const groupedAskOrders = groupBy(reversedAskSideOrders, state.tickSize);
       const askOrdersWithTotal = totalCalculator(groupedAskOrders);
       const maxAskTotal = askOrdersWithTotal[nrOfItems - 1]?.total;
 
@@ -168,4 +168,4 @@ const orderBookReducer = (
   }
 };
 
-export { orderBookReducer, initialState, nextProduct, groupBy };
+export { orderBookReducer, initialState, nextProduct, groupBy, groupings };
